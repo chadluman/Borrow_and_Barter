@@ -221,7 +221,10 @@ Open the local URL printed by Vite.
 - Messages are readable only by their sender or recipient.
 - Reservation details are readable only by the requester or owner.
 - Storage uploads require an authenticated session.
+- Uploads are limited to six JPG, PNG, WebP, or GIF files of at most 5 MB each.
+- Storage object paths are scoped to the authenticated user's ID.
 - Listing images are public so marketplace thumbnails can load for visitors.
+- A restrictive Content Security Policy limits scripts, connections, and images to approved sources.
 
 ## Image storage
 
@@ -266,5 +269,3 @@ Add the exact local and deployed `/auth` URLs to the Supabase authentication red
 
 - [Supabase and image storage setup](SUPABASE_STORAGE_SETUP.md)
 - [Payment and payout planning](PAYMENT_README.md)
-
-# Borrow_and_Barter
