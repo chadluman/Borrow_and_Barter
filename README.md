@@ -71,17 +71,17 @@ Borrow & Barter is a community marketplace for lending, buying, and trading usef
 
 ## Technology
 
-| System | Purpose |
-| --- | --- |
-| React 19 | Component-based frontend |
-| React Router 7 | Client-side routing and protected pages |
-| Vite 8 | Development server and production builds |
-| Supabase Auth | Registration, sessions, and password recovery |
-| Supabase PostgreSQL | Listings, messages, favorites, and reservations |
-| Supabase Storage | Public listing-image hosting |
-| Supabase Row Level Security | User and participant-based data access |
-| Oxlint | JavaScript and React linting |
-| CSS | Responsive branded interface and interaction states |
+| System                      | Purpose                                             |
+| --------------------------- | --------------------------------------------------- |
+| React 19                    | Component-based frontend                            |
+| React Router 7              | Client-side routing and protected pages             |
+| Vite 8                      | Development server and production builds            |
+| Supabase Auth               | Registration, sessions, and password recovery       |
+| Supabase PostgreSQL         | Listings, messages, favorites, and reservations     |
+| Supabase Storage            | Public listing-image hosting                        |
+| Supabase Row Level Security | User and participant-based data access              |
+| Oxlint                      | JavaScript and React linting                        |
+| CSS                         | Responsive branded interface and interaction states |
 
 ## Application structure
 
@@ -192,24 +192,24 @@ Open the local URL printed by Vite.
 
 ## Available commands
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Create a production build in `dist/` |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Start the Vite development server    |
+| `npm run build`   | Create a production build in `dist/` |
 | `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run Oxlint checks |
+| `npm run lint`    | Run Oxlint checks                    |
 
 ## Routes
 
-| Route | Access | Description |
-| --- | --- | --- |
-| `/` | Public | Browse and filter marketplace listings |
-| `/listings/:id` | Public | View listing details; sign-in required for actions |
-| `/auth` | Public | Register, sign in, or recover a password |
-| `/new` | Authenticated | Create and publish a listing |
-| `/dashboard` | Authenticated | View owned listings, favorites, and reservations |
-| `/commerce` | Authenticated | Review the planned commerce layer |
-| `/payment-readme` | Public | In-app pointer to payment setup documentation |
+| Route             | Access        | Description                                        |
+| ----------------- | ------------- | -------------------------------------------------- |
+| `/`               | Public        | Browse and filter marketplace listings             |
+| `/listings/:id`   | Public        | View listing details; sign-in required for actions |
+| `/auth`           | Public        | Register, sign in, or recover a password           |
+| `/new`            | Authenticated | Create and publish a listing                       |
+| `/dashboard`      | Authenticated | View owned listings, favorites, and reservations   |
+| `/commerce`       | Authenticated | Review the planned commerce layer                  |
+| `/payment-readme` | Public        | In-app pointer to payment setup documentation      |
 
 ## Security model
 
