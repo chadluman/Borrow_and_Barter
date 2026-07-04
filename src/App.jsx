@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import './App.css'
 import HomePage from './pages/HomePage'
 import CreateListingPage from './pages/CreateListingPage'
@@ -77,6 +78,7 @@ function App() {
       <footer className="footer">
         <p>Borrow & Barter is a live concept marketplace experience with authentication, listings, and chat flows connected to Supabase.</p>
       </footer>
+      <Analytics />
     </div>
   )
 }
