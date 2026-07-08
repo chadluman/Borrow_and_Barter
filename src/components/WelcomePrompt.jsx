@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-export default function WelcomePrompt() {
+export default function WelcomePrompt({ session, authReady }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const seen = sessionStorage.getItem('borrow-barter-welcome-seen')
-    if (!seen) {
+    if (authReady && !session && !seen) {
       setVisible(true)
+    } else {
+      setVisible(false)
     }
-  }, [])
+  }, [authReady, session])
 
   const dismiss = () => {
     sessionStorage.setItem('borrow-barter-welcome-seen', 'true')
     setVisible(false)
   }
 
-  if (!visible) return null
+  if (!authReady || session || !visible) return null
 
   return (
     <div className="welcome-banner">

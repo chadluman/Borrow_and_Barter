@@ -11,6 +11,7 @@ import { supabase } from './lib/supabase'
 
 function App() {
   const [session, setSession] = useState(null)
+  const [authReady, setAuthReady] = useState(false)
 
   const signedInName = session?.user
     ? session.user.user_metadata?.username
@@ -21,10 +22,14 @@ function App() {
     : ''
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setAuthReady(true)
+    })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
+      setAuthReady(true)
     })
 
     return () => listener.subscription.unsubscribe()
@@ -64,7 +69,7 @@ function App() {
 
       <main>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage session={session} authReady={authReady} />} />
           <Route path="/new" element={session ? <CreateListingPage /> : <Navigate to="/auth" replace />} />
           <Route path="/listings/:id" element={<ListingDetailPage />} />
           <Route path="/auth" element={<AuthPage />} />

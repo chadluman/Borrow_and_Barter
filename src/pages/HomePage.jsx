@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import WelcomePrompt from '../components/WelcomePrompt'
 import { supabase } from '../lib/supabase'
 
-export default function HomePage() {
+export default function HomePage({ session, authReady }) {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState('')
@@ -60,7 +60,7 @@ export default function HomePage() {
 
   return (
     <>
-      <WelcomePrompt />
+      <WelcomePrompt session={session} authReady={authReady} />
       <section className="hero">
         <div className="hero-copy">
           <p className="eyebrow">Borrow smarter. Trade easier.</p>
@@ -70,7 +70,9 @@ export default function HomePage() {
             and category browsing designed to feel familiar and polished.
           </p>
           <div className="hero-actions">
-            <Link className="primary-btn" to="/auth">Login to list or buy</Link>
+            <Link className="primary-btn" to={session ? '/new' : '/auth'}>
+              {session ? 'List or buy' : 'Login to list or buy'}
+            </Link>
             <a className="ghost-btn" href="#listings">Browse listings</a>
           </div>
         </div>
@@ -123,7 +125,7 @@ export default function HomePage() {
               <option value="location">Location</option>
               <option value="price">Price</option>
             </select>
-            <Link className="text-link" to="/auth">Create a listing</Link>
+            <Link className="text-link" to={session ? '/new' : '/auth'}>Create a listing</Link>
           </div>
         </div>
 

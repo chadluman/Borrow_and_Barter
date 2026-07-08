@@ -56,6 +56,17 @@ export default function DashboardPage() {
     window.location.href = '/'
   }
 
+  const formatAvailabilityDate = (date) => {
+    const parsedDate = new Date(`${date}T00:00:00`)
+
+    return {
+      weekday: parsedDate.toLocaleDateString(undefined, { weekday: 'short' }),
+      month: parsedDate.toLocaleDateString(undefined, { month: 'short' }),
+      day: parsedDate.toLocaleDateString(undefined, { day: 'numeric' }),
+      year: parsedDate.toLocaleDateString(undefined, { year: 'numeric' }),
+    }
+  }
+
   if (loading) {
     return <p className="status-pill">Loading dashboard…</p>
   }
@@ -91,15 +102,30 @@ export default function DashboardPage() {
         </div>
 
         <div className="availability-panel dashboard-availability">
-          <h3>Availability overview</h3>
+          <div className="availability-heading">
+            <div>
+              <h3>Availability overview</h3>
+              <p>Dates currently offered across your listings</p>
+            </div>
+            <strong className="availability-count">{availabilitySummary.length}</strong>
+          </div>
           {availabilitySummary.length ? (
-            <div className="availability-tags">
-              {availabilitySummary.map((date) => (
-                <span key={date} className="availability-chip">{new Date(`${date}T00:00:00`).toLocaleDateString()}</span>
-              ))}
+            <div className="availability-date-grid">
+              {availabilitySummary.map((date) => {
+                const formattedDate = formatAvailabilityDate(date)
+
+                return (
+                  <time key={date} className="availability-date" dateTime={date}>
+                    <span className="availability-weekday">{formattedDate.weekday}</span>
+                    <span className="availability-month">{formattedDate.month}</span>
+                    <strong>{formattedDate.day}</strong>
+                    <span className="availability-year">{formattedDate.year}</span>
+                  </time>
+                )
+              })}
             </div>
           ) : (
-            <p>No availability dates set yet. Add them when you create a listing.</p>
+            <p className="availability-empty">No availability dates set yet. Add them when you create a listing.</p>
           )}
         </div>
       </div>
