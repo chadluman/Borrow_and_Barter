@@ -4,8 +4,29 @@ function toIsoDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
+function parseDisplayDate(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return null
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [year, month, day] = raw.split('-').map(Number)
+    return new Date(Date.UTC(year, month - 1, day))
+  }
+
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (slashMatch) {
+    const [, month, day, year] = slashMatch
+    return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  }
+
+  const parsed = new Date(raw)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
 function formatLabel(date) {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date)
+  const parsed = parseDisplayDate(date)
+  if (!parsed) return String(date ?? '')
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(parsed)
 }
 
 export default function AvailabilityCalendar({ selectedDates = [], onChange }) {
@@ -83,7 +104,7 @@ export default function AvailabilityCalendar({ selectedDates = [], onChange }) {
         {selectedDates.length ? (
           <>
             <strong>Selected availability:</strong>
-            <p>{selectedDates.map((value) => formatLabel(new Date(`${value}T00:00:00`))).join(', ')}</p>
+            <p>{selectedDates.map((value) => formatLabel(value)).join(' • ')}</p>
           </>
         ) : (
           <p>Select dates this item is available for borrowing or pickup.</p>

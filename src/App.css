@@ -1374,6 +1374,42 @@ textarea {
   color: #f4d67a;
 }
 
+.availability-panel {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(248, 213, 109, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.availability-panel h3 {
+  margin: 0 0 6px;
+  color: #fff7e6;
+}
+
+.availability-panel p {
+  margin: 0 0 10px;
+  color: #cbc5bb;
+}
+
+.availability-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.availability-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 213, 109, 0.2);
+  background: rgba(248, 213, 109, 0.12);
+  color: #fff8de;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
 .image-viewer {
   display: grid;
   gap: 10px;

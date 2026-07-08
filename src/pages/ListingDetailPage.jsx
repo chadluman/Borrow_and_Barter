@@ -3,6 +3,31 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import ImageViewer from '../components/ImageViewer'
 import { supabase } from '../lib/supabase'
 
+function parseDisplayDate(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return null
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [year, month, day] = raw.split('-').map(Number)
+    return new Date(Date.UTC(year, month - 1, day))
+  }
+
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (slashMatch) {
+    const [, month, day, year] = slashMatch
+    return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  }
+
+  const parsed = new Date(raw)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function formatDisplayDate(value) {
+  const parsed = parseDisplayDate(value)
+  if (!parsed) return String(value ?? '')
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(parsed)
+}
+
 const getUserName = (user) => (
   user?.user_metadata?.username
   || user?.user_metadata?.full_name
@@ -67,7 +92,6 @@ export default function ListingDetailPage() {
             .from('messages')
             .select('*')
             .eq('listing_id', id)
-            .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
             .order('created_at', { ascending: true }),
           supabase
             .from('interests')
@@ -78,7 +102,12 @@ export default function ListingDetailPage() {
         ])
 
         if (!ignore) {
-          setMessages(messagesResult.data || [])
+          const visibleMessages = (messagesResult.data || []).filter((message) => {
+            if (!activeSession?.user) return false
+            return message.sender_id === userId || listingData.owner_id === userId
+          })
+
+          setMessages(visibleMessages)
           setIsFavorite(Boolean(favoriteResult.data))
         }
       }
@@ -138,15 +167,27 @@ export default function ListingDetailPage() {
     event.preventDefault()
     if (!requireSignIn() || !draft.trim() || !listing?.owner_id) return
 
-    const payload = {
+    const basePayload = {
       listing_id: Number(id),
       sender_id: session.user.id,
-      recipient_id: listing.owner_id,
       sender_name: getUserName(session.user),
       content: draft.trim(),
     }
 
-    const { data, error } = await supabase.from('messages').insert(payload).select()
+    const targetRecipientId = isOwner ? replyTarget?.sender_id || listing.owner_id : listing.owner_id
+    const payloadWithRecipient = {
+      ...basePayload,
+      recipient_id: targetRecipientId,
+    }
+
+    let data
+    let error
+
+    ;({ data, error } = await supabase.from('messages').insert(payloadWithRecipient).select())
+
+    if (error && /recipient_id|column/i.test(error.message)) {
+      ;({ data, error } = await supabase.from('messages').insert(basePayload).select())
+    }
 
     if (error) {
       setStatus(`Your message could not be sent: ${error.message}`)
@@ -156,7 +197,7 @@ export default function ListingDetailPage() {
 
     setMessages((current) => [...current, ...(data || [])])
     setDraft('')
-    setStatus(`Message sent to ${listing.owner_name || 'the lister'}.`)
+    setStatus(`Message sent to ${replyTarget?.sender_name || listing.owner_name || 'the lister'}.`)
     setStatusType('success')
   }
 
@@ -212,6 +253,9 @@ export default function ListingDetailPage() {
   const availableDates = [...(listing.availability || [])].sort()
   const validEndDates = availableDates.filter((date) => !startDate || date >= startDate)
   const today = new Date().toISOString().split('T')[0]
+  const replyTarget = session?.user && isOwner
+    ? [...messages].reverse().find((message) => message.sender_id && message.sender_id !== session.user.id) || null
+    : { id: listing.owner_id, name: listing.owner_name || 'the lister' }
 
   return (
     <section className="section detail-layout">
@@ -266,7 +310,7 @@ export default function ListingDetailPage() {
             <p>Select one or more of these dates when requesting a reservation.</p>
             <div className="availability-tags">
               {availableDates.map((date) => (
-                <span key={date} className="availability-chip">{new Date(`${date}T00:00:00`).toLocaleDateString()}</span>
+                <span key={date} className="availability-chip">{formatDisplayDate(date)}</span>
               ))}
             </div>
           </div>
@@ -289,7 +333,7 @@ export default function ListingDetailPage() {
                     setStartDate(event.target.value)
                     if (endDate < event.target.value) setEndDate(event.target.value)
                   }} required>
-                    {availableDates.map((date) => <option key={date} value={date}>{new Date(`${date}T00:00:00`).toLocaleDateString()}</option>)}
+                    {availableDates.map((date) => <option key={date} value={date}>{formatDisplayDate(date)}</option>)}
                   </select>
                 ) : <input type="date" min={today} value={startDate} onChange={(event) => setStartDate(event.target.value)} required />}
               </label>
@@ -297,7 +341,7 @@ export default function ListingDetailPage() {
                 <span>End date</span>
                 {availableDates.length ? (
                   <select value={endDate} onChange={(event) => setEndDate(event.target.value)} required>
-                    {validEndDates.map((date) => <option key={date} value={date}>{new Date(`${date}T00:00:00`).toLocaleDateString()}</option>)}
+                    {validEndDates.map((date) => <option key={date} value={date}>{formatDisplayDate(date)}</option>)}
                   </select>
                 ) : <input type="date" min={startDate || today} value={endDate} onChange={(event) => setEndDate(event.target.value)} required />}
               </label>
@@ -330,11 +374,11 @@ export default function ListingDetailPage() {
               </div>
             ) : <p className="chat-empty">No messages yet. Start the conversation.</p>}
 
-            {!isOwner ? (
+            {(!isOwner || replyTarget) ? (
               <form className="chat-form" onSubmit={handleSend}>
-                <label htmlFor="listing-message">Your message</label>
-                <textarea id="listing-message" ref={messageInputRef} value={draft} onChange={(event) => setDraft(event.target.value)} rows="4" maxLength="2000" placeholder="Ask about condition, pickup, or availability" required />
-                <button className="primary-btn" type="submit">Send message</button>
+                <label htmlFor="listing-message">{isOwner ? `Reply to ${replyTarget?.sender_name || 'the interested member'}` : 'Your message'}</label>
+                <textarea id="listing-message" ref={messageInputRef} value={draft} onChange={(event) => setDraft(event.target.value)} rows="4" maxLength="2000" placeholder={isOwner ? `Reply to ${replyTarget?.sender_name || 'the interested member'}` : 'Ask about condition, pickup, or availability'} required />
+                <button className="primary-btn" type="submit">{isOwner ? 'Send reply' : 'Send message'}</button>
               </form>
             ) : <p className="chat-empty">Messages from interested members appear here.</p>}
           </>
