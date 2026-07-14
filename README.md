@@ -268,4 +268,4 @@ Add the exact local and deployed `/auth` URLs to the Supabase authentication red
 ## Additional documentation
 
 - [Supabase and image storage setup](SUPABASE_STORAGE_SETUP.md)
-- [Payment and payout planning](PAYMENT_README.md)
+- [Payment and payout planning](PAYMENT_README.md) will be implemented once business accounts are made.
